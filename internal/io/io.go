@@ -7,10 +7,18 @@ import (
 	"strings"
 )
 
+type PageMetadata struct {
+	URL          string `json:"url"`
+	Title        string `json:"title"`
+	Date         string `json:"date,omitempty"`
+	LastModified string `json:"last_modified,omitempty"`
+	CrawlTime    string `json:"crawl_time"`
+	Depth        int    `json:"depth"`
+}
+
 type PageData struct {
-	URL     string              `json:"url"`
-	Title   string              `json:"title"`
-	Content map[string][]string `json:"content"`
+	Metadata PageMetadata        `json:"metadata"`
+	Content  map[string][]string `json:"content"`
 }
 
 func SavePageDataAsJSON(pageData PageData, filename string) error {
