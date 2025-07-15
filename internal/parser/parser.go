@@ -3,6 +3,8 @@ package parser
 import (
 	"strings"
 
+	htmltomarkdown "github.com/JohannesKaufmann/html-to-markdown/v2"
+	"github.com/JohannesKaufmann/html-to-markdown/v2/converter"
 	"github.com/PuerkitoBio/goquery"
 )
 
@@ -17,4 +19,19 @@ func ExtractContent(tags []string, doc *goquery.Document) map[string][]string {
 		})
 	}
 	return content
+}
+
+func ExtractContentAsMarkDown(body string, domain string) string {
+
+	markdown, err := htmltomarkdown.ConvertString(
+		body,
+		converter.WithDomain(domain),
+	)
+
+	if err != nil {
+		return ""
+	}
+
+	return markdown
+
 }
