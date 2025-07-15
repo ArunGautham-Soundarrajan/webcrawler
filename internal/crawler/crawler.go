@@ -2,8 +2,10 @@ package crawler
 
 import (
 	"fmt"
+	stdio "io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/ArunGautham-Soundarrajan/webcrawler/internal/io"
@@ -26,25 +28,37 @@ func Crawl(pageURL string, depth int, visited map[string]bool) {
 	}
 	defer resp.Body.Close()
 
+	bodyBytes, err := stdio.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return
+	}
+	bodyString := string(bodyBytes)
+
 	// Create a Goquery document
-	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(bodyString))
 	if err != nil {
 		fmt.Println("Error parsing HTML:", err)
 		return
 	}
 
 	title := doc.Find("title").Text()
-	fmt.Println("Title:", title, "URL:", pageURL, "Depth:", depth)
+	fmt.Println("URL:", pageURL, "Depth:", depth)
+
+	domain, err := url.Parse(pageURL)
+	if err != nil {
+		fmt.Println("Error resolving url:", err)
+		return
+	}
 
 	// Fetch Metadata
 	metadata := GetMetadata(pageURL, resp, depth, title)
 
-	// Fetch Content
-	content := parser.ExtractContent([]string{"h1", "h2", "p"}, doc)
+	content := parser.ExtractContentAsMarkDown(bodyString, domain.Hostname())
 
-	// Save as Json file
+	// Save as MarkDown file
 	filename := io.GenerateFilenameFromURL(pageURL)
-	err = io.SavePageDataAsJSON(io.PageData{Metadata: metadata, Content: content}, filename+".json")
+	err = io.SavePageDataAsMarkdown(io.PageData{Metadata: metadata, Content: content}, filename+".md")
 	if err != nil {
 		fmt.Println("Error saving JSON:", err)
 	}
