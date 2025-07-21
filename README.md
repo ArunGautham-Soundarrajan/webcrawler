@@ -1,5 +1,3 @@
-Here is the revised README document with a checkbox:
-
 # Web Crawler
 
 ================
