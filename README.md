@@ -1,7 +1,5 @@
 # Web Crawler
 
-================
-
 A web crawler written in Go that extracts content from web pages and saves it as Markdown files.
 
 ## Features
