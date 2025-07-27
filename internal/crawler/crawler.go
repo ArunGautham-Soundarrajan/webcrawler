@@ -15,6 +15,17 @@ import (
 )
 
 func Crawl(pageURL string, depth int, visited map[string]bool) {
+	parsed, err := url.Parse(pageURL)
+	if err != nil {
+		fmt.Println("Invalid URL:", pageURL)
+		return
+	}
+
+	if !CanCrawl(parsed.Path) {
+		fmt.Println("Blocked by robots.txt:", pageURL)
+		return
+	}
+
 	if visited[pageURL] || depth <= 0 {
 		return
 	}
