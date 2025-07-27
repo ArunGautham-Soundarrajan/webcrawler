@@ -2,6 +2,7 @@ package io
 
 import (
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"strings"
@@ -44,6 +45,7 @@ func SavePageDataAsMarkdown(pageData PageData, filename string) error {
 	frontmatter := fmt.Sprintf("---\n%s---\n\n", string(metaYAML))
 
 	_, err = file.WriteString(frontmatter + pageData.Content)
+	slog.Info("Saved page", "filename", filename)
 	return err
 
 }

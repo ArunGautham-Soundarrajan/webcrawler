@@ -1,8 +1,8 @@
 package crawler
 
 import (
-	"fmt"
 	stdio "io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -17,12 +17,12 @@ import (
 func Crawl(pageURL string, depth int, visited map[string]bool) {
 	parsed, err := url.Parse(pageURL)
 	if err != nil {
-		fmt.Println("Invalid URL:", pageURL)
+		slog.Error("Invalid URL", slog.Any("url", pageURL), slog.Any("error", err))
 		return
 	}
 
 	if !CanCrawl(parsed.Path) {
-		fmt.Println("Blocked by robots.txt:", pageURL)
+		slog.Info("Blocked by robots.txt", slog.Any("url", pageURL))
 		return
 	}
 
@@ -34,14 +34,14 @@ func Crawl(pageURL string, depth int, visited map[string]bool) {
 	// Fetch the url
 	resp, err := http.Get(pageURL)
 	if err != nil {
-		fmt.Println("Error fetching page:", err)
+		slog.Error("Error fetching page", slog.Any("url", pageURL), slog.Any("error", err))
 		return
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := stdio.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		slog.Error("Error reading response body", slog.Any("url", pageURL), slog.Any("error", err))
 		return
 	}
 	bodyString := string(bodyBytes)
@@ -49,16 +49,16 @@ func Crawl(pageURL string, depth int, visited map[string]bool) {
 	// Create a Goquery document
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(bodyString))
 	if err != nil {
-		fmt.Println("Error parsing HTML:", err)
+		slog.Error("Error parsing HTML", slog.Any("url", pageURL), slog.Any("error", err))
 		return
 	}
 
 	title := doc.Find("title").Text()
-	fmt.Println("URL:", pageURL, "Depth:", depth)
+	slog.Info("Crawling", slog.Any("url", pageURL), slog.Any("depth", depth))
 
 	domain, err := url.Parse(pageURL)
 	if err != nil {
-		fmt.Println("Error resolving url:", err)
+		slog.Error("Error parsing URL", slog.Any("url", pageURL), slog.Any("error", err))
 		return
 	}
 
@@ -71,7 +71,7 @@ func Crawl(pageURL string, depth int, visited map[string]bool) {
 	filename := io.GenerateFilenameFromURL(pageURL)
 	err = io.SavePageDataAsMarkdown(io.PageData{Metadata: metadata, Content: content}, filename+".md")
 	if err != nil {
-		fmt.Println("Error saving JSON:", err)
+		slog.Error("Error saving page data", slog.Any("url", pageURL), slog.Any("error", err))
 	}
 
 	// Find the link and crawl recursively

@@ -26,7 +26,6 @@ func RobotstxtInit(domain string) {
 
 func CanCrawl(url string) bool {
 	if robotsData == nil {
-		println("robotsData is nil")
 		return true
 	}
 	group := robotsData.FindGroup("*")

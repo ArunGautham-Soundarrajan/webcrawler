@@ -4,15 +4,34 @@ import (
 	"net/url"
 
 	"github.com/ArunGautham-Soundarrajan/webcrawler/internal/crawler"
+	"github.com/spf13/cobra"
 )
 
-func main() {
-	var pageURL string = "https://www.scrapethissite.com/"
-	var depth int = 2
+var rootCmd = &cobra.Command{
+	Use:   "webcrawler",
+	Short: "A simple web crawler",
+	Run: func(cmd *cobra.Command, args []string) {
+		PageUrl, _ := cmd.Flags().GetString("url")
+		depth, _ := cmd.Flags().GetInt("depth")
+		start(PageUrl, depth)
+	},
+}
+
+func init() {
+	rootCmd.Flags().String("url", "", "URL to crawl")
+	rootCmd.Flags().Int("depth", 1, "Depth to crawl")
+	rootCmd.MarkFlagRequired("url")
+}
+func start(PageUrl string, depth int) {
+
+	parsed, _ := url.Parse(PageUrl)
+	crawler.RobotstxtInit(parsed.Scheme + "://" + parsed.Host)
 	var visited = make(map[string]bool)
 
-	parsed, _ := url.Parse(pageURL)
-	crawler.RobotstxtInit(parsed.Scheme + "://" + parsed.Host)
+	crawler.Crawl(PageUrl, depth, visited)
 
-	crawler.Crawl(pageURL, depth, visited)
+}
+
+func main() {
+	rootCmd.Execute()
 }
