@@ -38,6 +38,7 @@ This is the second section.
 
 ## Todo
 
+- [x] Add support for robots.txt
 - [ ] Add support for multiple crawl threads
 - [ ] Implement rate limiting to avoid overwhelming websites
 - [ ] Add option to save output to a database instead of filesystem
